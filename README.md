@@ -12,6 +12,7 @@ It includes a public landing page, a student career workspace, role matching, sa
 - [Tech stack](#tech-stack)
 - [Try the demo](#try-the-demo)
 - [Run the frontend preview](#run-the-frontend-preview)
+- [Deploy on Vercel](#deploy-on-vercel)
 - [Run the full application](#run-the-full-application)
 - [Configuration](#configuration)
 - [How the application works](#how-the-application-works)
@@ -84,6 +85,16 @@ npm run dev
 Open the local URL printed by Vite, usually `http://localhost:5173`. If that port is already in use, Vite may choose another port.
 
 When the backend is unavailable, the dashboard uses clearly labelled sample jobs. Sign-up and sign-in can use browser preview accounts. API-backed actions such as submitting an application are not available in this mode.
+
+## Deploy on Vercel
+
+For the quickest public preview, import `the-nidhi-bhat/Skill-Bridge-` as a **single Vite project**. In the import screen, choose the Vite app at the repository root (`./`) and do not enable multi-service mode. Vercel's multi-service suggestion detects the optional Flask matcher but does not configure this project's Express API, MongoDB, or Gemini key; deploying that suggestion as-is would leave account and application features disconnected.
+
+Use the Vite preset and the defaults from `package.json`: build command `npm run build`, output directory `dist`. The root `vercel.json` provides the SPA rewrite needed for direct visits to `/dashboard` and other client-side paths. With no API URL configured, the deployment runs in browser preview mode with fictional jobs and local preview accounts.
+
+For real accounts and applications, deploy the Express API as a separate Node web service (for example, Render) and use MongoDB Atlas for its database. Configure the API service with `MONGO_URI`, a unique `JWT_SECRET`, and `CLIENT_URL` set to the deployed Vercel origin. Then set Vercel's `VITE_API_BASE` to the API's HTTPS origin, without a trailing `/api`, and redeploy. `GEMINI_API_KEY` is optional and belongs only in the API service's environment. The Python matcher is optional and can be deployed separately if the resume-to-job matching endpoint is needed.
+
+The demo recruiter credentials and `npm run seed` are intended for local development; do not seed the public database with the demo recruiter account.
 
 ## Run the full application
 

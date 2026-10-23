@@ -102,6 +102,19 @@ async function api(path, { token, ...options } = {}) {
     }
     throw new Error('Couldn’t reach SkillBridge. Check that the API is running, or keep exploring the preview.')
   }
+  const contentType = response.headers.get('content-type') || ''
+  const isAuthRequest = path === '/auth/login' || path === '/auth/register'
+  if (!contentType.includes('application/json')) {
+    // A static Vite deployment can rewrite unknown paths, including /api/*,
+    // to index.html. Treat that response like an unavailable API so preview
+    // sign-in and sign-up still use the browser-only account store.
+    if (response.ok && isAuthRequest) {
+      return localPreviewAuth(path, { method, body: options.body })
+    }
+    if (response.ok) {
+      throw new Error('The SkillBridge API is not connected yet. You can keep exploring in preview mode.')
+    }
+  }
   const data = await response.json().catch(() => ({}))
   if (!response.ok && response.status >= 500 && (path === '/auth/login' || path === '/auth/register')) {
     return localPreviewAuth(path, { method, body: options.body })
