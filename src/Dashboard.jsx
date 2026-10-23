@@ -508,10 +508,15 @@ const [page, setPage] = useState(() => {
   const [notice, setNotice] = useState('')
   const [noticeKind, setNoticeKind] = useState('success')
   const [coachQuestion, setCoachQuestion] = useState('')
-  const [coachAnswer, setCoachAnswer] = useState('')
+  const [coachMessages, setCoachMessages] = useState([])
   const [coachBusy, setCoachBusy] = useState(false)
   const [coachError, setCoachError] = useState('')
+  const coachEndRef = useRef(null)
   const profilePhotoKey = user?.id || user?._id || user?.email || ''
+
+  useEffect(() => {
+    if (page === 'coach') coachEndRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' })
+  }, [coachMessages, coachBusy, page, reduceMotion])
 
   useEffect(() => {
     const photos = readStorage(STORAGE.profilePhotos, {})
@@ -728,13 +733,20 @@ const [page, setPage] = useState(() => {
 
   async function askCoach(event) {
     event.preventDefault()
-    if (!coachQuestion.trim()) return
+    const question = coachQuestion.trim()
+    if (!question || coachBusy) return
     setCoachBusy(true)
     setCoachError('')
-    setCoachAnswer('')
+    setCoachQuestion('')
+    setCoachMessages((messages) => [...messages, { id: `${Date.now()}-user`, role: 'user', content: question }])
     try {
-      const data = await api('/ai/mentor', { method: 'POST', body: { question: coachQuestion.trim(), skills: studentSkills, targetRole: search || user?.targetRole || 'early-career role' } })
-      setCoachAnswer(data.answer || 'I couldn’t find an answer just now. Try asking in another way.')
+      const data = await api('/ai/mentor', { method: 'POST', body: {
+        question,
+        skills: studentSkills,
+        targetRole: search || user?.targetRole || 'early-career role',
+        conversation: coachMessages.slice(-8).map(({ role, content }) => ({ role, content })),
+      } })
+      setCoachMessages((messages) => [...messages, { id: `${Date.now()}-coach`, role: 'coach', content: data.answer || 'I couldn’t find an answer just now. Try asking in another way.' }])
     } catch (error) {
       setCoachError(error.message.includes('not configured') ? 'Your career coach is ready, but Gemini has not been connected yet. Add GEMINI_API_KEY to the server .env file to turn on replies.' : error.message)
     } finally { setCoachBusy(false) }
@@ -743,6 +755,7 @@ const [page, setPage] = useState(() => {
   function signOut() {
     sessionStorage.removeItem(STORAGE.token)
     setToken(''); setUser(null); setApplications([]); setSavedIds(readStorage(STORAGE.demoSaved, []))
+    setCoachMessages([]); setCoachQuestion(''); setCoachError('')
     announce('You’re signed out. Your demo shortlist is still here.')
   }
 
@@ -770,6 +783,11 @@ const [page, setPage] = useState(() => {
     { title: 'Add your strengths', detail: studentSkills.length ? `${studentSkills.length} skills in your profile` : 'Start with skills you already use', done: studentSkills.length > 0, icon: GraduationCap, action: () => user ? setDialog('profile') : setDialog('auth') },
     { title: 'Save a role that feels right', detail: currentSavedIds.length ? `${currentSavedIds.length} role${currentSavedIds.length === 1 ? '' : 's'} in your shortlist` : 'Keep a possibility close for later', done: currentSavedIds.length > 0, icon: Bookmark, action: () => navigate('jobs') },
     { title: 'Explore one skill to grow', detail: roadmap.length ? `${roadmap.length} practical next step${roadmap.length === 1 ? '' : 's'} ready` : 'Find a gentle next step from open roles', done: false, icon: Map, action: () => navigate('roadmap') },
+  ]
+  const coachPrompts = [
+    { label: 'Resume help', description: 'Make a project or class experience clearer.', question: 'Can you help me make my resume clearer for an early-career role?', icon: FileText },
+    { label: 'Role ideas', description: 'Find roles that connect to what I know.', question: `What entry-level roles could use ${studentSkills.slice(0, 2).join(' and ') || 'my current strengths'}?`, icon: Compass },
+    { label: 'Learning plan', description: 'Choose one practical step to take next.', question: `What is one useful thing I can learn next for ${user?.targetRole || 'a role I’m interested in'}?`, icon: GraduationCap },
   ]
 
   return (
@@ -872,7 +890,42 @@ const [page, setPage] = useState(() => {
               {page === 'applications' && <section className="content-section application-section"><div className="section-heading"><div><span className="section-kicker">APPLICATION TRACKER</span><h2>{applications.length ? 'Your recent applications' : 'Your next chapter starts with one'}</h2></div>{user && <span className="tracker-count">{applications.length} sent</span>}</div>{!user ? <EmptyState icon={FileText} title="Sign in to see your applications" description="Your application history stays connected to your account, so it’s here when you need it." action="Sign in" onAction={() => setDialog('auth')} /> : applications.length ? <div className="application-list">{applications.map((application) => <article className="application-row" key={application._id}><div className="application-mark"><BriefcaseBusiness size={19} /></div><div className="application-copy"><h3>{application.job?.title || 'Role no longer available'}</h3><p>{application.job?.company || 'Company details unavailable'} <span>·</span> Applied {new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(new Date(application.createdAt))}</p></div><span className={`status-pill status-${application.status?.toLowerCase().replaceAll(' ', '-')}`}>{application.status}</span></article>)}</div> : <EmptyState icon={ArrowUpRight} title="No applications yet" description="That’s okay. Take a look around, save the roles that interest you, and apply when it feels right." action="Explore roles" onAction={() => navigate('jobs')} />}</section>}
 
               {page === 'roadmap' && <section className="roadmap-page"><div className="roadmap-intro"><div className="roadmap-intro-icon"><GraduationCap size={24} /></div><div><span className="section-kicker">A PLAN THAT CAN CHANGE</span><h2>{roadmap.length ? `A few skills for your next step` : 'Start with the skills you have'}</h2><p>{roadmap.length ? 'These are skills listed in roles close to your current experience. Pick one that interests you; there’s no rush.' : user ? 'Add your current skills and we’ll look for common themes in open roles.' : 'Browse some roles, then create a profile to get a skill plan shaped around you.'}</p></div></div>{roadmap.length ? <ol className="roadmap-list">{roadmap.map((item, index) => <motion.li key={item.id} className="roadmap-item" initial={reduceMotion ? false : { opacity: 0, y: 8 }} whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.3, ease: 'easeOut' }}><span className="roadmap-step">{String(index + 1).padStart(2, '0')}</span><div><span className="priority-label">{item.priority} focus</span><h3>{item.skill}</h3><p>{item.task}</p><div className="roadmap-project"><CheckCircle2 size={15} /><span>Try this: {item.project}</span></div><a href={item.resource} target="_blank" rel="noreferrer" className="text-button roadmap-link">Open a learning resource <ArrowUpRight size={14} /></a></div><span className="hours-label"><Clock3 size={14} /> about {item.estimatedHours} hrs</span></motion.li>)}</ol> : <div className="roadmap-empty"><EmptyState icon={Map} title="Your plan starts with a conversation" description="Add a few skills to your profile and we’ll compare them with the roles you’re exploring." action={user ? 'Add my skills' : 'Create my profile'} onAction={() => user ? setDialog('profile') : setDialog('auth')} /></div>}<p className="roadmap-footnote"><CircleHelp size={15} /> A match score reflects listed skills only. It’s a guide for exploring, never a measure of your potential.</p></section>}
-              {page === 'coach' && <section className="coach-workspace"><div className="coach-workspace-intro"><span className="coach-workspace-mark"><Sparkles size={21} /></span><div><span className="section-kicker">YOUR CAREER COACH</span><h2>A thoughtful place to start.</h2><p>Ask about roles, skills, or how to take the next step. Suggestions are a starting point; you decide what feels right.</p></div></div><div className="coach-workspace-card"><div className="coach-response-area"><div className="coach-response-badge"><Sparkles size={15} /> SkillBridge coach</div>{coachAnswer ? <div className="coach-answer"><h3>Here’s one way to think about it</h3><p>{coachAnswer}</p></div> : <div className="coach-empty"><MessageCircle size={24} /><h3>What’s on your mind?</h3><p>Try one of these to get started.</p><div className="coach-starters">{['How can I improve my resume?', 'What should I learn for a data role?', 'Help me understand a job match.'].map((prompt) => <button key={prompt} onClick={() => setCoachQuestion(prompt)}>{prompt}<ArrowUpRight size={14} /></button>)}</div></div>}{coachError && <p className="form-error" role="alert">{coachError}</p>}</div><form className="coach-ask-form" onSubmit={askCoach}><label className="sr-only" htmlFor="coach-question">Ask your career coach</label><textarea id="coach-question" rows="3" maxLength="4000" value={coachQuestion} onChange={(event) => setCoachQuestion(event.target.value)} placeholder="Ask about a role, a skill, or what to do next…" /><div><span>Your profile skills are included to personalize replies.</span><button className="button button-primary" disabled={coachBusy || !coachQuestion.trim()}>{coachBusy ? 'Thinking…' : 'Ask coach'}<ArrowRight size={16} /></button></div></form></div><p className="coach-disclaimer"><CircleHelp size={15} /> AI guidance can make mistakes. Check important information and keep control of every application.</p></section>}
+              {page === 'coach' && <section className="coach-workspace">
+                <div className="coach-workspace-intro">
+                  <span className="coach-workspace-mark"><Sparkles size={21} /></span>
+                  <div><span className="section-kicker">YOUR CAREER COACH</span><h2>Let’s work through your next step.</h2><p>Ask about a role, your resume, or what to learn. You can start with a prompt below and shape the conversation as you go.</p></div>
+                </div>
+                <div className="coach-workspace-card">
+                  <div className="coach-session-header">
+                    <span className="coach-session-avatar"><Sparkles size={17} /></span>
+                    <span className="coach-session-title"><strong>SkillBridge coach</strong><small>Practical guidance, at your pace</small></span>
+                    <span className="coach-session-state"><i /> Career support</span>
+                    {coachMessages.length > 0 && <button type="button" className="coach-clear-button" aria-label="Start a new conversation" onClick={() => { setCoachMessages([]); setCoachQuestion(''); setCoachError('') }}><X size={14} /> New conversation</button>}
+                  </div>
+                  <div className="coach-thread" role="log" aria-live="polite" aria-relevant="additions text" aria-label="Career coach conversation">
+                    {!coachMessages.length ? <div className="coach-welcome">
+                      <div className="coach-welcome-message"><span className="coach-message-avatar"><Sparkles size={16} /></span><div><span className="coach-message-label">A note from your coach</span><p>Hi{user?.name ? ` ${user.name.split(' ')[0]}` : ''}. Tell me what you’re working toward, and we can make the next step feel a little clearer.</p></div></div>
+                      <div className="coach-prompt-heading"><span>Choose a place to begin</span><small>Or ask your own question below</small></div>
+                      <div className="coach-starters">{coachPrompts.map(({ label, description, question, icon: Icon }) => <button key={label} type="button" onClick={() => { setCoachQuestion(question); setCoachError(''); document.getElementById('coach-question')?.focus() }}><span className="coach-prompt-icon"><Icon size={17} /></span><span className="coach-prompt-copy"><strong>{label}</strong><small>{description}</small></span><ArrowUpRight size={15} /></button>)}</div>
+                    </div> : <div className="coach-message-list">
+                      {coachMessages.map((message) => <motion.article key={message.id} className={`coach-message coach-message-${message.role}`} initial={reduceMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reduceMotion ? 0 : 0.24, ease: 'easeOut' }}>
+                        {message.role === 'coach' && <span className="coach-message-avatar"><Sparkles size={15} /></span>}
+                        <div className="coach-message-content"><span className="coach-message-label">{message.role === 'user' ? 'You' : 'SkillBridge coach'}</span><p>{message.content}</p></div>
+                        {message.role === 'user' && <Avatar name={user?.name || 'You'} photo={profilePhoto} className="coach-user-avatar" />}
+                      </motion.article>)}
+                      {coachBusy && <div className="coach-message coach-message-coach" role="status" aria-label="Your coach is thinking"><span className="coach-message-avatar"><Sparkles size={15} /></span><span className="coach-thinking"><i /><i /><i /></span></div>}
+                      <div ref={coachEndRef} />
+                    </div>}
+                  </div>
+                  {coachError && <div className="coach-error-note" role="alert"><CircleHelp size={16} /><span>{coachError}</span></div>}
+                  <form className="coach-ask-form" onSubmit={askCoach}>
+                    <label className="sr-only" htmlFor="coach-question">Message your career coach</label>
+                    <textarea id="coach-question" rows="2" maxLength="4000" value={coachQuestion} disabled={coachBusy} onChange={(event) => setCoachQuestion(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form?.requestSubmit() } }} placeholder="Write what’s on your mind… (Enter to send, Shift + Enter for a new line)" />
+                    <div className="coach-composer-footer"><span>{user?.targetRole ? `Thinking about ${user.targetRole}` : 'Your profile skills help shape replies'}</span><button className="button button-primary" disabled={coachBusy || !coachQuestion.trim()}>{coachBusy ? 'Thinking…' : 'Send message'}<ArrowRight size={16} /></button></div>
+                  </form>
+                </div>
+                <p className="coach-disclaimer"><CircleHelp size={15} /> AI suggestions can miss context. Use what helps and check important details.</p>
+              </section>}
             </motion.div>
           </AnimatePresence>
 
