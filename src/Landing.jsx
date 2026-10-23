@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
 import { ArrowDown, ArrowRight, ArrowUpRight, BookmarkCheck, BriefcaseBusiness, Check, Compass, Moon, Sparkles, Sun, UserRound, ChartNoAxesColumnIncreasing } from 'lucide-react'
 import './Landing.css'
@@ -72,6 +72,13 @@ export default function Landing({ theme, setTheme }) {
   const reduceMotion = useReducedMotion()
   const heroTitle = useRef(null)
   const progressRef = useRef(null)
+  const [navScrolled, setNavScrolled] = useState(false)
+  useEffect(() => {
+    const updateNav = () => setNavScrolled(window.scrollY > 24)
+    updateNav()
+    window.addEventListener('scroll', updateNav, { passive: true })
+    return () => window.removeEventListener('scroll', updateNav)
+  }, [])
   useEffect(() => {
     if (reduceMotion) return
     const split = heroTitle.current?.querySelectorAll('[data-word]')
@@ -108,6 +115,13 @@ export default function Landing({ theme, setTheme }) {
           opacity: 1, y: 0, duration: 0.72, stagger: 0.14, ease: 'power2.out',
           scrollTrigger: { trigger: '.journey-grid', start: 'top 82%', once: true },
         })
+        const journeyDetails = gsap.timeline({
+          scrollTrigger: { trigger: '.journey-grid', start: 'top 72%', once: true },
+        })
+        journeyDetails
+          .from('.skill-chip-row i', { y: 12, scale: 0.88, opacity: 0, duration: 0.38, stagger: 0.09, ease: 'back.out(1.7)' }, 0.18)
+          .from('.match-reason span:not(.match-line)', { y: 10, scale: 0.82, opacity: 0, duration: 0.35, stagger: 0.1, ease: 'back.out(1.5)' }, 0.32)
+          .from('.plan-point', { scale: 0.35, opacity: 0, duration: 0.38, stagger: 0.16, ease: 'back.out(2)' }, 0.4)
         gsap.fromTo('.feature-image img', { scale: 1.08 }, {
           scale: 1, ease: 'none',
           scrollTrigger: { trigger: '.feature-image', start: 'top bottom', end: 'bottom top', scrub: 0.45 },
@@ -131,7 +145,7 @@ export default function Landing({ theme, setTheme }) {
   return <div className="landing-page">
     <div className="landing-progress" aria-hidden="true"><span ref={progressRef} /></div>
     <a className="landing-skip" href="#landing-main">Skip to content</a>
-    <header className="landing-nav">
+    <header className={`landing-nav${navScrolled ? ' nav-scrolled' : ''}`}>
       <a className="landing-brand" href="/"><span className="brand-symbol"><span /></span><span>skillbridge<span className="brand-dot">.</span></span></a>
       <nav className="landing-nav-links" aria-label="Main navigation"><a href="#how-it-works">How it works</a><a href="#for-you">For students</a><a href="#coach">The career coach</a></nav>
       <div className="landing-nav-actions"><button className="theme-toggle" aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`} onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>{theme === 'light' ? <Moon size={17} /> : <Sun size={17} />}</button><a className="nav-signin" href={`${dashboardLink}?auth=login`}>Sign in</a><a className="button button-primary nav-cta" href={`${dashboardLink}?auth=register`}>Get started <ArrowUpRight size={16} /></a></div>

@@ -239,3 +239,39 @@
 @media (prefers-reduced-motion: reduce) {
   .journey-card:hover { transform: none; }
 }
+
+/* Keep navigation close at hand without covering the story. */
+.landing-nav {
+  position: fixed;
+  max-width: none;
+  transition: background-color .28s ease, border-color .28s ease, box-shadow .28s ease, padding .28s ease;
+}
+.landing-nav.nav-scrolled {
+  padding-block: 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  background: color-mix(in srgb, var(--paper) 91%, transparent);
+  box-shadow: 0 8px 28px rgb(30 48 37 / 6%);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+:root[data-theme="dark"] .landing-nav.nav-scrolled {
+  box-shadow: 0 8px 28px rgb(0 0 0 / 18%);
+}
+main[id="landing-main"] section[id] { scroll-margin-top: 92px; }
+
+/* Small details animate when their part of the career journey arrives. */
+.skill-chip-row i,
+.match-reason > span:not(.match-line),
+.plan-point { will-change: transform, opacity; }
+.match-line { transform-origin: left center; }
+.journey-card:hover .match-line { animation: match-draw .48s cubic-bezier(.2,.75,.25,1) both; }
+@keyframes match-draw { from { transform: scaleX(.25); opacity: .35; } to { transform: scaleX(1); opacity: 1; } }
+
+@media (max-width: 760px) {
+  .landing-nav.nav-scrolled { padding-block: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-nav, .landing-nav.nav-scrolled { transition: none; }
+  .skill-chip-row i, .match-reason > span:not(.match-line), .plan-point { will-change: auto; }
+  .journey-card:hover .match-line { animation: none; }
+}
