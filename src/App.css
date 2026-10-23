@@ -804,3 +804,66 @@ body, .workspace, .sidebar, .main-content, .job-card, .application-section,
   .topbar-actions { gap: 5px; }
   .top-signin { padding-inline: 8px; font-size: 11px; }
 }
+
+/* A personal, image-led starting point for the dashboard. */
+.momentum-panel { display: grid; grid-template-columns: minmax(0, 1.03fr) minmax(0, .97fr); gap: 18px; margin: 0 0 38px; }
+.momentum-scene { position: relative; display: flex; min-height: 320px; overflow: hidden; align-items: flex-end; padding: clamp(22px, 3vw, 34px); border-radius: 20px; isolation: isolate; color: #fffdf8; background: linear-gradient(135deg, #516b55, #263b30); }
+.momentum-scene > img, .momentum-scene-shade { position: absolute; z-index: -1; inset: 0; width: 100%; height: 100%; }
+.momentum-scene > img { object-fit: cover; object-position: center 44%; transition: transform .7s cubic-bezier(.2,.75,.25,1), filter .3s ease; }
+.momentum-scene:hover > img { transform: scale(1.035); }
+.momentum-scene-shade { background: linear-gradient(180deg, rgb(18 31 24 / 5%) 5%, rgb(18 31 24 / 77%) 100%), linear-gradient(90deg, rgb(22 39 28 / 36%), transparent 92%); }
+.momentum-scene-copy { max-width: 390px; }
+.momentum-scene-copy > span, .momentum-photo-note { font-size: 11px; font-weight: 700; letter-spacing: .1em; }
+.momentum-scene-copy h2 { max-width: 370px; margin: 12px 0 8px; font: 600 clamp(29px, 3vw, 38px)/1.05 var(--font-display); letter-spacing: -.035em; text-wrap: balance; }
+.momentum-scene-copy p { margin: 0 0 18px; color: rgb(255 253 248 / 83%); font-size: 14px; line-height: 1.6; }
+.momentum-browse { display: inline-flex; min-height: 46px; align-items: center; gap: 9px; padding: 0 15px; border: 1px solid rgb(255 255 255 / 45%); border-radius: 10px; color: #fffdf8; background: rgb(255 255 255 / 12%); font-size: 13px; font-weight: 700; backdrop-filter: blur(8px); transition: background .2s ease, transform .2s ease; }
+.momentum-browse:hover { transform: translateY(-2px); background: rgb(255 255 255 / 22%); }
+.momentum-photo-note { position: absolute; top: 18px; right: 18px; display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px; border: 1px solid rgb(255 255 255 / 30%); border-radius: 99px; color: white; background: rgb(26 42 32 / 35%); font-size: 10px; letter-spacing: 0; backdrop-filter: blur(8px); }
+.momentum-checklist { display: grid; align-content: start; gap: 8px; padding: clamp(19px, 2.5vw, 28px); border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
+.momentum-list-heading { margin-bottom: 5px; }
+.momentum-list-heading h2 { margin: 5px 0 3px; color: var(--ink); font: 600 24px/1.2 var(--font-display); letter-spacing: -.02em; }
+.momentum-list-heading p { margin: 0 0 5px; color: var(--muted); font-size: 13px; }
+.momentum-step { display: grid; grid-template-columns: 40px minmax(0, 1fr) 34px; align-items: center; gap: 11px; min-height: 68px; padding: 9px 4px; border: 0; border-top: 1px solid var(--line); color: var(--ink); background: transparent; text-align: left; }
+.momentum-step-icon, .momentum-step-status { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; color: var(--green-dark); background: var(--green-pale); transition: color .2s ease, background .2s ease, transform .2s ease; }
+.momentum-step-copy { display: grid; gap: 4px; min-width: 0; }
+.momentum-step-copy strong { color: var(--ink); font-size: 14px; font-weight: 650; }
+.momentum-step-copy small { color: var(--muted); font-size: 12px; line-height: 1.45; }
+.momentum-step-status { justify-self: end; width: 32px; height: 32px; border: 1px solid var(--line); background: var(--surface-quiet); }
+.momentum-step-status.is-done { color: #fff; border-color: var(--green); background: var(--green); }
+.momentum-step:hover .momentum-step-icon { transform: translateY(-2px); color: #fff; background: var(--green); }
+.momentum-step:hover .momentum-step-status:not(.is-done) { transform: translate(2px, -2px); color: var(--accent); border-color: var(--accent); }
+.avatar-image { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+.profile-editor-avatar { overflow: hidden; }
+.profile-photo-control { display: grid; grid-template-columns: 62px minmax(0, 1fr); align-items: center; gap: 14px; margin: 0 0 18px; padding: 14px; border: 1px solid var(--line); border-radius: 15px; background: var(--surface-quiet); }
+.profile-photo-preview { width: 62px; height: 62px; flex-basis: 62px; overflow: hidden; border: 2px solid var(--surface); border-radius: 50%; font-size: 24px; box-shadow: 0 0 0 1px var(--line); }
+.profile-photo-copy { display: grid; gap: 4px; min-width: 0; }
+.profile-photo-copy > strong { color: var(--ink); font-size: 14px; }
+.profile-photo-copy > span { color: var(--muted); font-size: 12px; line-height: 1.45; }
+.profile-photo-actions { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+.photo-upload-button, .photo-remove-button { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: var(--surface); font-size: 12px; font-weight: 700; cursor: pointer; }
+.photo-upload-button input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
+.photo-upload-button:focus-within { outline: 3px solid var(--green); outline-offset: 3px; }
+.photo-remove-button { border-color: transparent; color: var(--muted); background: transparent; }
+.photo-remove-button:hover { color: var(--accent); background: var(--accent-pale); }
+.profile-photo-control .form-error { grid-column: 1 / -1; margin: 0; }
+:root[data-theme="dark"] .momentum-checklist { border-color: var(--line); background: var(--surface); }
+:root[data-theme="dark"] .momentum-step { border-color: var(--line); }
+:root[data-theme="dark"] .momentum-step-status.is-done { color: #142019; background: var(--green); }
+:root[data-theme="dark"] .profile-photo-control { border-color: var(--line); background: var(--surface-quiet); }
+:root[data-theme="dark"] .photo-upload-button { color: var(--ink); border-color: var(--line); background: var(--surface); }
+@media (max-width: 900px) {
+  .momentum-panel { grid-template-columns: minmax(0, 1fr); }
+  .momentum-scene { min-height: 300px; }
+}
+@media (max-width: 520px) {
+  .momentum-panel { gap: 12px; margin-bottom: 29px; }
+  .momentum-scene { min-height: 310px; padding: 22px; border-radius: 17px; }
+  .momentum-scene-copy h2 { font-size: 31px; }
+  .momentum-checklist { padding: 19px 16px; border-radius: 17px; }
+  .profile-photo-control { grid-template-columns: 52px minmax(0, 1fr); gap: 11px; padding: 11px; }
+  .profile-photo-preview { width: 52px; height: 52px; flex-basis: 52px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .momentum-scene > img, .momentum-browse, .momentum-step-icon, .momentum-step-status { transition: none; }
+  .momentum-scene:hover > img, .momentum-browse:hover, .momentum-step:hover .momentum-step-icon, .momentum-step:hover .momentum-step-status { transform: none; }
+}

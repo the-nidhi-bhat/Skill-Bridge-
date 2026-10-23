@@ -16,6 +16,7 @@ const STORAGE = {
   token: 'skillbridge-token',
   demoSaved: 'skillbridge-demo-saved',
   previewAccounts: 'skillbridge-preview-accounts',
+  profilePhotos: 'skillbridge-profile-photos',
 }
 const PREVIEW_DEMO = {
   email: 'demo@skillbridge.local',
@@ -137,6 +138,12 @@ function hasPreviewAccount(email) {
 
 function previewUser(account) {
   return { id: account.id, name: account.name, email: account.email, role: 'student', skills: account.skills || [], education: account.education || '', targetRole: account.targetRole || '', savedJobs: account.savedJobs || [] }
+}
+
+function Avatar({ name, photo, className = '' }) {
+  return <span className={`avatar ${className}`.trim()} aria-hidden="true">
+    {photo ? <img className="avatar-image" src={photo} alt="" /> : name?.trim()?.slice(0, 1)?.toUpperCase() || 'S'}
+  </span>
 }
 
 function toBase64(bytes) {
@@ -345,7 +352,7 @@ function AuthDialog({ onClose, onAuthenticated, announce, initialMode = 'login' 
   )
 }
 
-function ProfileDialog({ user, token, onClose, onUpdated }) {
+function ProfileDialog({ user, token, photo, onPhotoChange, onClose, onUpdated }) {
   const [name, setName] = useState(user.name || '')
   const [education, setEducation] = useState(user.education || '')
   const [targetRole, setTargetRole] = useState(user.targetRole || '')
@@ -355,9 +362,44 @@ function ProfileDialog({ user, token, onClose, onUpdated }) {
   const [resumeMessage, setResumeMessage] = useState('')
   const [resumeFileName, setResumeFileName] = useState('')
   const [resumeBusy, setResumeBusy] = useState(false)
+  const [photoError, setPhotoError] = useState('')
+  const [photoBusy, setPhotoBusy] = useState(false)
   const chosenSkills = parseSkillList(skills)
   const checklist = [Boolean(name.trim()), Boolean(targetRole.trim()), Boolean(education.trim()), chosenSkills.length > 0]
   const completion = Math.round(checklist.filter(Boolean).length / checklist.length * 100)
+
+  async function readPhoto(file) {
+    setPhotoError('')
+    if (!file.type.startsWith('image/')) { setPhotoError('Choose an image file such as JPG, PNG, or WebP.'); return }
+    if (file.size > 5 * 1024 * 1024) { setPhotoError('Choose an image smaller than 5 MB.'); return }
+    setPhotoBusy(true)
+    let imageUrl
+    try {
+      imageUrl = URL.createObjectURL(file)
+      const image = new Image()
+      await new Promise((resolve, reject) => {
+        image.onload = resolve
+        image.onerror = () => reject(new Error('This image could not be opened. Try another one.'))
+        image.src = imageUrl
+      })
+      const size = 360
+      const scale = Math.min(size / image.naturalWidth, size / image.naturalHeight, 1)
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
+      canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height)
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.82))
+      if (!blob) throw new Error('This image could not be prepared. Try another one.')
+      const reader = new FileReader()
+      const dataUrl = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result)
+        reader.onerror = () => reject(new Error('This image could not be saved. Try another one.'))
+        reader.readAsDataURL(blob)
+      })
+      onPhotoChange(dataUrl)
+    } catch (readError) { setPhotoError(readError.message) }
+    finally { if (imageUrl) URL.revokeObjectURL(imageUrl); setPhotoBusy(false) }
+  }
 
   async function readResume(file) {
     setError('')
@@ -391,10 +433,15 @@ function ProfileDialog({ user, token, onClose, onUpdated }) {
 
   return <Dialog title="Build your career profile" onClose={onClose} size="wide">
     <div className="profile-editor-summary">
-      <div className="profile-editor-avatar">{name.trim().slice(0, 1).toUpperCase() || <GraduationCap size={20} />}</div>
+      <Avatar name={name} photo={photo} className="profile-editor-avatar" />
       <div className="profile-editor-summary-copy"><strong>{name.trim() || 'Your profile'}</strong><span>{targetRole.trim() || 'Add a role you’re curious about'}</span></div>
       <div className="profile-editor-score"><strong>{completion}%</strong><span>complete</span></div>
       <div className="profile-editor-track" role="progressbar" aria-valuenow={completion} aria-valuemin="0" aria-valuemax="100" aria-label="Profile completion"><span style={{ width: `${completion}%` }} /></div>
+    </div>
+    <div className="profile-photo-control">
+      <Avatar name={name} photo={photo} className="profile-photo-preview" />
+      <div className="profile-photo-copy"><strong>Make this space yours</strong><span>Your photo stays in this browser and is resized before saving.</span><div className="profile-photo-actions"><label className="photo-upload-button">{photoBusy ? 'Preparing photo…' : 'Choose a photo'}<input type="file" accept="image/*" aria-label="Choose a profile photo" disabled={photoBusy} onChange={(event) => { const file = event.target.files?.[0]; if (file) readPhoto(file); event.target.value = '' }} /></label>{photo && <button type="button" className="photo-remove-button" onClick={() => { onPhotoChange(''); setPhotoError('') }}>Remove</button>}</div></div>
+      {photoError && <p className="form-error" role="alert">{photoError}</p>}
     </div>
     <p className="dialog-intro">A little context helps SkillBridge connect your strengths to roles and suggest a useful next step. You can change this any time.</p>
     <form className="form-stack profile-form" onSubmit={submit}>
@@ -441,6 +488,7 @@ const [page, setPage] = useState(() => {
   const [jobs, setJobs] = useState([])
   const [applications, setApplications] = useState([])
   const [user, setUser] = useState(null)
+  const [profilePhoto, setProfilePhoto] = useState('')
   const [token, setToken] = useState(() => sessionStorage.getItem(STORAGE.token) || '')
   const [savedIds, setSavedIds] = useState(() => readStorage(STORAGE.demoSaved, []))
   const [demoMode, setDemoMode] = useState(false)
@@ -463,6 +511,12 @@ const [page, setPage] = useState(() => {
   const [coachAnswer, setCoachAnswer] = useState('')
   const [coachBusy, setCoachBusy] = useState(false)
   const [coachError, setCoachError] = useState('')
+  const profilePhotoKey = user?.id || user?._id || user?.email || ''
+
+  useEffect(() => {
+    const photos = readStorage(STORAGE.profilePhotos, {})
+    setProfilePhoto(profilePhotoKey ? photos[profilePhotoKey] || '' : '')
+  }, [profilePhotoKey])
 
   const announce = useCallback((message, kind = 'success') => {
     setNotice(message)
@@ -692,11 +746,30 @@ const [page, setPage] = useState(() => {
     announce('You’re signed out. Your demo shortlist is still here.')
   }
 
+  function saveProfilePhoto(nextPhoto) {
+    if (!profilePhotoKey) return
+    const photos = readStorage(STORAGE.profilePhotos, {})
+    try {
+      if (nextPhoto) photos[profilePhotoKey] = nextPhoto
+      else delete photos[profilePhotoKey]
+      localStorage.setItem(STORAGE.profilePhotos, JSON.stringify(photos))
+      setProfilePhoto(nextPhoto)
+      announce(nextPhoto ? 'Your profile photo is saved on this device.' : 'Your profile photo was removed.')
+    } catch {
+      announce('This browser is out of storage space. Remove an older photo and try again.', 'error')
+    }
+  }
+
   const title = pageCopy[page] || pageCopy.home
   const stats = [
     { label: 'Roles to explore', value: jobs.length, icon: Compass, note: demoMode ? 'Preview listings' : 'Open right now' },
     { label: 'In your shortlist', value: currentSavedIds.length, icon: Bookmark, note: 'Take your time' },
     { label: 'Applications sent', value: applications.length, icon: FileText, note: 'One step at a time' },
+  ]
+  const momentumSteps = [
+    { title: 'Add your strengths', detail: studentSkills.length ? `${studentSkills.length} skills in your profile` : 'Start with skills you already use', done: studentSkills.length > 0, icon: GraduationCap, action: () => user ? setDialog('profile') : setDialog('auth') },
+    { title: 'Save a role that feels right', detail: currentSavedIds.length ? `${currentSavedIds.length} role${currentSavedIds.length === 1 ? '' : 's'} in your shortlist` : 'Keep a possibility close for later', done: currentSavedIds.length > 0, icon: Bookmark, action: () => navigate('jobs') },
+    { title: 'Explore one skill to grow', detail: roadmap.length ? `${roadmap.length} practical next step${roadmap.length === 1 ? '' : 's'} ready` : 'Find a gentle next step from open roles', done: false, icon: Map, action: () => navigate('roadmap') },
   ]
 
   return (
@@ -718,7 +791,7 @@ const [page, setPage] = useState(() => {
           </nav>
           <div className="sidebar-note"><span className="note-icon"><Heart size={17} /></span><p>There’s no perfect path.<br /><strong>Just your next one.</strong></p><ArrowDownRight size={17} className="note-arrow" /></div>
           <div className="sidebar-account">
-            <div className="avatar avatar-small">{user?.name?.slice(0, 1)?.toUpperCase() || 'S'}</div>
+            <Avatar name={user?.name} photo={profilePhoto} className="avatar-small" />
             <div className="account-copy"><strong>{user?.name || 'Your workspace'}</strong><span>{user ? 'Student account' : demoMode ? 'Preview mode' : 'Getting your space ready'}</span></div>
             {user ? <button className="account-action" aria-label="Sign out" title="Sign out" onClick={signOut}><LogOut size={16} /></button> : <button className="account-action" aria-label="Sign in" title="Sign in" onClick={() => setDialog('auth')}><ArrowUpRight size={17} /></button>}
           </div>
@@ -731,7 +804,7 @@ const [page, setPage] = useState(() => {
             <div className="topbar-actions">
               <span className={`connection-state ${demoMode ? 'preview-state' : ''}`}><span />{demoMode ? 'Preview data' : jobsLoading ? 'Loading roles' : 'Opportunities updated'}</span>
               <button className="theme-toggle" aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`} onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>{theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}</button>
-              {user ? <button className="profile-button" onClick={() => setDialog('profile')}><span className="avatar">{user.name?.slice(0, 1)?.toUpperCase()}</span><span className="profile-button-name">{user.name?.split(' ')[0]}</span><Settings2 size={15} /></button> : <button className="button button-outline top-signin" onClick={() => setDialog('auth')}>Sign in <ArrowUpRight size={15} /></button>}
+              {user ? <button className="profile-button" onClick={() => setDialog('profile')}><Avatar name={user.name} photo={profilePhoto} /><span className="profile-button-name">{user.name?.split(' ')[0]}</span><Settings2 size={15} /></button> : <button className="button button-outline top-signin" onClick={() => setDialog('auth')}>Sign in <ArrowUpRight size={15} /></button>}
             </div>
           </header>
 
@@ -750,6 +823,17 @@ const [page, setPage] = useState(() => {
                   <div className="next-step-art"><div className="art-note">A GOOD FIT<br /><strong>takes shape</strong></div><BridgeMark /><span className="art-caption">your experience <i /> what’s next</span></div>
                 </section>
                 <section className="stats-row" aria-label="Your career activity">{stats.map(({ label, value, icon: Icon, note }) => <article className="stat-item" key={label}><div className="stat-icon"><Icon size={17} /></div><div><span className="stat-label">{label}</span><strong className="stat-value">{value}</strong><span className="stat-note">{note}</span></div></article>)}</section>
+                <motion.section className="momentum-panel" aria-labelledby="momentum-title" initial={reduceMotion ? false : { opacity: 0, y: 18 }} whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.12 }} transition={{ duration: 0.5, ease: 'easeOut' }}>
+                  <div className="momentum-scene">
+                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000&q=82" alt="Students sharing ideas around a table" loading="lazy" decoding="async" />
+                    <div className="momentum-scene-shade" />
+                    <div className="momentum-scene-copy"><span>YOUR SEARCH, YOUR PACE</span><h2 id="momentum-title">Build a path that feels like yours.</h2><p>One thoughtful step is enough to get moving.</p><button className="momentum-browse" onClick={() => navigate('jobs')}>Find a place to begin <ArrowRight size={16} /></button></div>
+                    <span className="momentum-photo-note"><Sparkles size={14} /> Small steps count</span>
+                  </div>
+                  <div className="momentum-checklist"><div className="momentum-list-heading"><span className="section-kicker">A LITTLE MOMENTUM</span><h2>Your next few steps</h2><p>Choose whichever feels useful today.</p></div>
+                    {momentumSteps.map(({ title: stepTitle, detail, done, icon: Icon, action }, index) => <button className="momentum-step" key={stepTitle} onClick={action}><span className="momentum-step-icon"><Icon size={17} /></span><span className="momentum-step-copy"><strong>{stepTitle}</strong><small>{detail}</small></span><span className={`momentum-step-status ${done ? 'is-done' : ''}`} aria-label={done ? 'Done' : 'Open'}>{done ? <Check size={15} /> : <ArrowUpRight size={15} />}</span><span className="sr-only">Step {index + 1}</span></button>)}
+                  </div>
+                </motion.section>
                 <div className="dashboard-grid">
                   <section className="content-section recommended-section">
                     <div className="section-heading"><div><span className="section-kicker">A PLACE TO BEGIN</span><h2>Roles worth a look</h2></div><button className="text-button" onClick={() => navigate('jobs')}>See all roles <ArrowRight size={15} /></button></div>
@@ -790,7 +874,7 @@ const [page, setPage] = useState(() => {
       <div className={`toast toast-${noticeKind}`} role="status" aria-live="polite" aria-atomic="true" data-visible={Boolean(notice)}>{notice && <><CheckCircle2 size={17} /><span>{notice}</span><button aria-label="Dismiss message" onClick={() => setNotice('')}><X size={15} /></button></>}</div>
 
       <AnimatePresence>{dialog === 'auth' && <AuthDialog key="auth" initialMode={new URLSearchParams(window.location.search).get('auth') === 'register' ? 'register' : 'login'} onClose={(result) => { setDialog(''); if (result?.authenticated && pendingJob) { setSelectedJob(pendingJob); setPendingJob(null); setDialog('apply') } else if (!result?.authenticated) setPendingJob(null) }} onAuthenticated={saveSession} announce={announce} />}</AnimatePresence>
-      <AnimatePresence>{dialog === 'profile' && user && <ProfileDialog key="profile" user={user} token={token} onClose={() => setDialog('')} onUpdated={(nextUser) => { setUser(nextUser); announce('Your profile is up to date.') }} />}</AnimatePresence>
+      <AnimatePresence>{dialog === 'profile' && user && <ProfileDialog key="profile" user={user} token={token} photo={profilePhoto} onPhotoChange={saveProfilePhoto} onClose={() => setDialog('')} onUpdated={(nextUser) => { setUser(nextUser); announce('Your profile is up to date.') }} />}</AnimatePresence>
       <AnimatePresence>{dialog === 'apply' && selectedJob && <ApplyDialog key="apply" job={selectedJob} onClose={() => { setDialog(''); setDialogError('') }} onApply={submitApplication} busy={applyBusy} error={dialogError} />}</AnimatePresence>
       <AnimatePresence>{selectedJob && dialog !== 'apply' && <JobDetailsDialog key={`job-${selectedJob._id}`} job={selectedJob} saved={currentSavedIds.includes(selectedJob._id)} onClose={() => setSelectedJob(null)} onSave={() => toggleSave(selectedJob)} onApply={() => startApply(selectedJob)} user={user} />}</AnimatePresence>
       {authChecking && <span className="sr-only" role="status">Checking your account…</span>}
