@@ -340,3 +340,7 @@ main[id="landing-main"] section[id] { scroll-margin-top: 92px; }
   .people-photo img { transition: none; }
   .people-photo:hover img { transform: none; }
 }
+.closing-path { transform-origin: center top; animation: closing-path-breathe 3.8s ease-in-out infinite alternate; }
+.closing-path::after { position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; content: ""; border-radius: 50%; background: #c47a5a; box-shadow: 0 0 0 5px rgb(196 122 90 / 12%), 0 0 22px 8px rgb(196 122 90 / 18%); }
+@keyframes closing-path-breathe { from { scale: 1 .88; opacity: .5; } to { scale: 1 1.08; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .closing-path { animation: none; } }

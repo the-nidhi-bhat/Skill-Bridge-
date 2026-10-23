@@ -878,3 +878,27 @@ body, .workspace, .sidebar, .main-content, .job-card, .application-section,
   .momentum-polaroids img + img { margin-top: 11px; }
   .momentum-photo-note { top: 13px; right: 13px; padding: 7px 9px; font-size: 9px; }
 }
+.explore-photo-banner { position: relative; display: grid; grid-template-columns: minmax(150px, .62fr) 1fr auto; align-items: center; gap: 18px; min-height: 128px; margin: 0 0 18px; padding: 12px 20px 12px 12px; overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: var(--surface-quiet); }
+.explore-photo-frame { height: 104px; overflow: hidden; border-radius: 10px; background: var(--green-pale); }
+.explore-photo-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center 46%; transition: transform .55s cubic-bezier(.2,.75,.25,1); }
+.explore-photo-banner:hover .explore-photo-frame img { transform: scale(1.045); }
+.explore-photo-copy { display: grid; gap: 3px; }
+.explore-photo-copy > span { color: var(--green); font-size: 9px; font-weight: 800; letter-spacing: .11em; }
+.explore-photo-copy p { margin: 0; color: var(--ink); font: 600 18px/1.2 var(--font-display); letter-spacing: -.02em; }
+.explore-photo-copy small { color: var(--muted); font-size: 11px; }
+.explore-photo-spark { margin-right: 6px; color: var(--accent); animation: explore-spark 3s ease-in-out infinite; }
+@keyframes explore-spark { 50% { transform: translateY(-4px) rotate(9deg); opacity: .7; } }
+:root[data-theme="dark"] .explore-photo-banner { background: var(--surface-quiet); }
+:root[data-theme="dark"] .explore-photo-frame { background: #263b2d; }
+@media (max-width: 560px) {
+  .explore-photo-banner { grid-template-columns: 100px 1fr; gap: 12px; min-height: 100px; margin-bottom: 14px; padding: 9px 12px 9px 9px; }
+  .explore-photo-frame { height: 78px; }
+  .explore-photo-copy p { font-size: 15px; }
+  .explore-photo-copy small { font-size: 10px; }
+  .explore-photo-spark { position: absolute; top: 10px; right: 7px; width: 14px; height: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .explore-photo-frame img { transition: none; }
+  .explore-photo-banner:hover .explore-photo-frame img { transform: none; }
+  .explore-photo-spark { animation: none; }
+}
