@@ -779,7 +779,7 @@ const [page, setPage] = useState(() => {
       <div className="workspace">
         <AnimatePresence>{mobileNav && <motion.button className="mobile-scrim" aria-label="Close navigation" onClick={() => setMobileNav(false)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />}</AnimatePresence>
         <motion.aside ref={mobileNavRef} className={`sidebar ${mobileNav ? 'sidebar-open' : ''}`} aria-label="Main navigation" inert={smallScreen && !mobileNav} initial={false}>
-          <a className="brand" href="/dashboard" onClick={(event) => { event.preventDefault(); navigate('home') }}><span className="brand-icon"><BridgeMark /></span><span>skillbridge<span className="brand-period">.</span></span></a>
+          <a className="brand" aria-label="SkillBridge overview" href="/dashboard" onClick={(event) => { event.preventDefault(); navigate('home') }}><span className="brand-icon"><img src="/skillbridge-mark.svg" alt="" width="42" height="42" /></span><span>skillbridge<span className="brand-period">.</span></span></a>
           <div className="sidebar-intro"><p>A little direction<br />goes a long way.</p><span>Find your next step, not just your next job.</span></div>
           <p className="nav-heading">YOUR SPACE</p>
           <nav className="nav-list">
