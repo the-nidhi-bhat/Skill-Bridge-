@@ -827,6 +827,10 @@ const [page, setPage] = useState(() => {
                   <div className="momentum-scene">
                     <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000&q=82" alt="Students sharing ideas around a table" loading="lazy" decoding="async" />
                     <div className="momentum-scene-shade" />
+                    <div className="momentum-polaroids" aria-hidden="true">
+                      <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=320&q=78" alt="" loading="lazy" decoding="async" />
+                      <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=320&q=78" alt="" loading="lazy" decoding="async" />
+                    </div>
                     <div className="momentum-scene-copy"><span>YOUR SEARCH, YOUR PACE</span><h2 id="momentum-title">Build a path that feels like yours.</h2><p>One thoughtful step is enough to get moving.</p><button className="momentum-browse" onClick={() => navigate('jobs')}>Find a place to begin <ArrowRight size={16} /></button></div>
                     <span className="momentum-photo-note"><Sparkles size={14} /> Small steps count</span>
                   </div>
@@ -853,6 +857,11 @@ const [page, setPage] = useState(() => {
 
               {page === 'jobs' && <section className="content-section jobs-explorer">
                 <div className="section-heading jobs-heading"><div><span className="section-kicker">MAKE IT YOUR SEARCH</span><h2>What are you looking for?</h2></div><label className="sort-control"><span>Sort by</span><select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}><option>Best fit</option><option>Newest</option></select><ChevronDown size={14} /></label></div>
+                <motion.div className="explore-photo-banner" initial={reduceMotion ? false : { opacity: 0, y: 14 }} whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.4, ease: 'easeOut' }}>
+                  <div className="explore-photo-frame"><img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=760&q=80" alt="A student exploring ideas on a laptop" loading="lazy" decoding="async" /></div>
+                  <div className="explore-photo-copy"><span>BEGIN WITH CURIOSITY</span><p>Good searches start with a question.</p><small>Try a skill, a role, or a place below.</small></div>
+                  <Sparkles className="explore-photo-spark" size={19} aria-hidden="true" />
+                </motion.div>
                 <div className="filter-row"><label className="search-box"><Search size={18} /><span className="sr-only">Search jobs, companies, or skills</span><input type="search" name="job-search" autoComplete="off" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Try ‘design’, ‘SQL’, or a company…" />{search && <button className="clear-search" aria-label="Clear search" onClick={() => setSearch('')}><X size={16} /></button>}</label><label className="filter-control"><Filter size={16} /><span className="sr-only">Filter by job type</span><select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}><option>All types</option><option>Full-time</option><option>Part-time</option><option>Internship</option><option>Contract</option></select><ChevronDown size={14} /></label><label className="location-control"><span className="sr-only">Filter by location</span><input name="location" value={locationFilter} onChange={(event) => setLocationFilter(event.target.value)} placeholder="Any location" /><ChevronDown size={14} aria-hidden="true" /></label></div>
                 <p className="results-count">{jobsLoading ? 'Looking for roles…' : `${visibleJobs.length} ${visibleJobs.length === 1 ? 'role' : 'roles'} to explore`}{search && ` for “${search}”`}</p>
                 {jobsLoading ? <LoadingState label="Finding roles that might suit you…" /> : <JobList jobs={visibleJobs} savedIds={currentSavedIds} onSave={toggleSave} onApply={startApply} onDetails={setSelectedJob} onSignIn={() => setDialog('auth')} user={user} emptyTitle={page === 'saved' ? 'Your shortlist is open' : 'No roles match that search'} emptyDescription={page === 'saved' ? 'Save a role that catches your eye and it’ll be waiting here.' : 'Try another skill, job title, or location.'} onClear={() => { setSearch(''); setTypeFilter('All types'); setLocationFilter('') }} />}
