@@ -1,0 +1,24 @@
+:root .landing-brand .brand-symbol {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+}
+.landing-brand .brand-symbol::before,
+.landing-brand .brand-symbol > span { display: none; }
+.landing-brand .brand-symbol img,
+:root .brand-icon img { display: block; width: 100%; height: 100%; object-fit: contain; }
+:root .brand-icon {
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+}
+.landing-brand:focus-visible .brand-symbol,
+.brand:focus-visible .brand-icon { border-radius: 13px; }

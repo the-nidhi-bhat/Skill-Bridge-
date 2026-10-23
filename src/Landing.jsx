@@ -146,7 +146,7 @@ export default function Landing({ theme, setTheme }) {
     <div className="landing-progress" aria-hidden="true"><span ref={progressRef} /></div>
     <a className="landing-skip" href="#landing-main">Skip to content</a>
     <header className={`landing-nav${navScrolled ? ' nav-scrolled' : ''}`}>
-      <a className="landing-brand" href="/"><span className="brand-symbol"><span /></span><span>skillbridge<span className="brand-dot">.</span></span></a>
+      <a className="landing-brand" href="/" aria-label="SkillBridge home"><span className="brand-symbol"><img src="/skillbridge-mark.svg" alt="" width="40" height="40" /></span><span>skillbridge<span className="brand-dot">.</span></span></a>
       <nav className="landing-nav-links" aria-label="Main navigation"><a href="#how-it-works">How it works</a><a href="#for-you">For students</a><a href="#coach">The career coach</a></nav>
       <div className="landing-nav-actions"><button className="theme-toggle" aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`} onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>{theme === 'light' ? <Moon size={17} /> : <Sun size={17} />}</button><a className="nav-signin" href={`${dashboardLink}?auth=login`}>Sign in</a><a className="button button-primary nav-cta" href={`${dashboardLink}?auth=register`}>Get started <ArrowUpRight size={16} /></a></div>
       <a className="mobile-start" href={`${dashboardLink}?auth=register`}>Start <ArrowUpRight size={15} /></a>
@@ -196,6 +196,6 @@ export default function Landing({ theme, setTheme }) {
       <section className="closing-section reveal"><div className="closing-art"><div className="closing-sun" /><span className="closing-arc arc-a" /><span className="closing-arc arc-b" /><span className="closing-arc arc-c" /><span className="closing-path" /></div><span className="eyebrow">Whenever you’re ready</span><h2>Your next chapter<br /><em>can start here.</em></h2><p>There’s no perfect starting point. Take the one that feels right.</p><a className="button button-primary button-large" href={`${dashboardLink}?auth=register`}>Create your free account <ArrowRight size={18} /></a></section>
     </main>
 
-    <footer className="landing-footer"><a className="landing-brand" href="/"><span className="brand-symbol"><span /></span><span>skillbridge<span className="brand-dot">.</span></span></a><span>Made for the next step, wherever it leads.</span><nav aria-label="Footer"><a href="#how-it-works">How it works</a><a href="/dashboard">Explore roles <ArrowUpRight size={13} /></a><a href={`${dashboardLink}?auth=login`}>Sign in</a></nav><small>SkillBridge © {new Date().getFullYear()}</small></footer>
+    <footer className="landing-footer"><a className="landing-brand" href="/" aria-label="SkillBridge home"><span className="brand-symbol"><img src="/skillbridge-mark.svg" alt="" width="40" height="40" /></span><span>skillbridge<span className="brand-dot">.</span></span></a><span>Made for the next step, wherever it leads.</span><nav aria-label="Footer"><a href="#how-it-works">How it works</a><a href="/dashboard">Explore roles <ArrowUpRight size={13} /></a><a href={`${dashboardLink}?auth=login`}>Sign in</a></nav><small>SkillBridge © {new Date().getFullYear()}</small></footer>
   </div>
 }
