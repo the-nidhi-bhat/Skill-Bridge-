@@ -156,6 +156,15 @@ export default function Landing({ theme, setTheme }) {
     <main id="landing-main">
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero-grain" aria-hidden="true" />
+        <div className="hero-atmosphere" aria-hidden="true">
+          <span className="atmosphere-orbit atmosphere-orbit-a" />
+          <span className="atmosphere-orbit atmosphere-orbit-b" />
+          <span className="atmosphere-glow atmosphere-glow-a" />
+          <span className="atmosphere-glow atmosphere-glow-b" />
+          <span className="atmosphere-spark atmosphere-spark-a" />
+          <span className="atmosphere-spark atmosphere-spark-b" />
+          <span className="atmosphere-spark atmosphere-spark-c" />
+        </div>
         <div className="hero-copy">
           <span className="eyebrow"><span className="eyebrow-dot" /> A calmer way to find your way in</span>
           <h1 id="hero-title" ref={heroTitle}>{title.map((line, li) => <span className="title-line" key={line}>{line.split(' ').map((word, wi) => <span data-word key={`${li}-${wi}`}>{word}&nbsp;</span>)}</span>)}</h1>
@@ -173,6 +182,15 @@ export default function Landing({ theme, setTheme }) {
       </section>
 
       <section className="intro-strip reveal"><span className="section-index">01 / A BETTER START</span><p>You don’t need to have it all figured out.<br /><em>You just need a place to begin.</em></p><span className="intro-mark"><span /><span /><span /></span></section>
+
+      <section className="people-strip reveal" aria-label="Students learning and working together">
+        <div className="people-strip-heading"><span className="section-index">SMALL STEPS, REAL LIFE</span><p>There is no one way<br /><em>to find your way.</em></p></div>
+        <div className="people-strip-photos">
+          <figure className="people-photo people-photo-one"><img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=760&q=82" alt="A group of colleagues sharing ideas around a table" loading="lazy" /><figcaption><span>01</span> Learn together</figcaption></figure>
+          <figure className="people-photo people-photo-two"><img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=760&q=82" alt="Students spending time together outdoors" loading="lazy" /><figcaption><span>02</span> Find your people</figcaption></figure>
+          <figure className="people-photo people-photo-three"><img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=760&q=82" alt="A team collaborating on a project" loading="lazy" /><figcaption><span>03</span> Make something real</figcaption></figure>
+        </div>
+      </section>
 
       <section id="how-it-works" className="journey-section">
         <div className="section-heading reveal"><div><span className="eyebrow">A path that meets you here</span><h2>One small step.<br /><em>Then another.</em></h2></div><p>Start with what you already know. SkillBridge helps turn it into a search and a plan that feel like yours.</p></div>
