@@ -819,6 +819,10 @@ body, .workspace, .sidebar, .main-content, .job-card, .application-section,
 .momentum-browse { display: inline-flex; min-height: 46px; align-items: center; gap: 9px; padding: 0 15px; border: 1px solid rgb(255 255 255 / 45%); border-radius: 10px; color: #fffdf8; background: rgb(255 255 255 / 12%); font-size: 13px; font-weight: 700; backdrop-filter: blur(8px); transition: background .2s ease, transform .2s ease; }
 .momentum-browse:hover { transform: translateY(-2px); background: rgb(255 255 255 / 22%); }
 .momentum-photo-note { position: absolute; top: 18px; right: 18px; display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px; border: 1px solid rgb(255 255 255 / 30%); border-radius: 99px; color: white; background: rgb(26 42 32 / 35%); font-size: 10px; letter-spacing: 0; backdrop-filter: blur(8px); }
+.momentum-polaroids { position: absolute; z-index: 1; top: 72px; right: 24px; display: flex; align-items: flex-start; gap: 10px; pointer-events: none; }
+.momentum-polaroids img { width: 76px; height: 96px; padding: 4px 4px 14px; border: 1px solid rgb(255 255 255 / 62%); border-radius: 8px; background: #fffdf8; object-fit: cover; box-shadow: 0 12px 30px rgb(10 22 15 / 28%); transform: rotate(7deg); animation: polaroid-float 5s ease-in-out infinite alternate; }
+.momentum-polaroids img + img { margin-top: 22px; transform: rotate(-8deg); animation-delay: -2.2s; }
+@keyframes polaroid-float { from { translate: 0 0; } to { translate: 0 -7px; } }
 .momentum-checklist { display: grid; align-content: start; gap: 8px; padding: clamp(19px, 2.5vw, 28px); border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
 .momentum-list-heading { margin-bottom: 5px; }
 .momentum-list-heading h2 { margin: 5px 0 3px; color: var(--ink); font: 600 24px/1.2 var(--font-display); letter-spacing: -.02em; }
@@ -866,4 +870,11 @@ body, .workspace, .sidebar, .main-content, .job-card, .application-section,
 @media (prefers-reduced-motion: reduce) {
   .momentum-scene > img, .momentum-browse, .momentum-step-icon, .momentum-step-status { transition: none; }
   .momentum-scene:hover > img, .momentum-browse:hover, .momentum-step:hover .momentum-step-icon, .momentum-step:hover .momentum-step-status { transform: none; }
+  .momentum-polaroids img { animation: none; }
+}
+@media (max-width: 520px) {
+  .momentum-polaroids { top: 62px; right: 14px; gap: 5px; }
+  .momentum-polaroids img { width: 48px; height: 62px; padding: 3px 3px 9px; border-radius: 5px; }
+  .momentum-polaroids img + img { margin-top: 11px; }
+  .momentum-photo-note { top: 13px; right: 13px; padding: 7px 9px; font-size: 9px; }
 }

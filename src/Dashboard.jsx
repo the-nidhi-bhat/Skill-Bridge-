@@ -827,6 +827,10 @@ const [page, setPage] = useState(() => {
                   <div className="momentum-scene">
                     <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000&q=82" alt="Students sharing ideas around a table" loading="lazy" decoding="async" />
                     <div className="momentum-scene-shade" />
+                    <div className="momentum-polaroids" aria-hidden="true">
+                      <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=320&q=78" alt="" loading="lazy" decoding="async" />
+                      <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=320&q=78" alt="" loading="lazy" decoding="async" />
+                    </div>
                     <div className="momentum-scene-copy"><span>YOUR SEARCH, YOUR PACE</span><h2 id="momentum-title">Build a path that feels like yours.</h2><p>One thoughtful step is enough to get moving.</p><button className="momentum-browse" onClick={() => navigate('jobs')}>Find a place to begin <ArrowRight size={16} /></button></div>
                     <span className="momentum-photo-note"><Sparkles size={14} /> Small steps count</span>
                   </div>

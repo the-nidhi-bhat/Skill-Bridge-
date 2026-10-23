@@ -126,6 +126,11 @@ export default function Landing({ theme, setTheme }) {
           scale: 1, ease: 'none',
           scrollTrigger: { trigger: '.feature-image', start: 'top bottom', end: 'bottom top', scrub: 0.45 },
         })
+        gsap.to('.hero-atmosphere', { yPercent: 13, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.65 } })
+        gsap.fromTo('.people-photo img', { scale: 1.12 }, {
+          scale: 1, ease: 'none',
+          scrollTrigger: { trigger: '.people-strip', start: 'top bottom', end: 'bottom top', scrub: 0.55 },
+        })
         gsap.fromTo('.coach-preview', { opacity: 0, y: 48, rotate: 3 }, {
           opacity: 1, y: 0, rotate: 1, duration: 0.9, ease: 'power2.out',
           scrollTrigger: { trigger: '.coach-preview', start: 'top 84%', once: true },
